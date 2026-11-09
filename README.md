@@ -1,6 +1,8 @@
 # 🏋️ Form Coach: AI phân tích kỹ thuật tập luyện qua camera
 
-> **Trạng thái (05/11/2026):** **đã deploy**, dùng thử tại **https://form-coach-3r5n.onrender.com**. Xong tuần 1–3 (đếm rep, dataset 5 buổi có nhãn, luật so với random forest chấm theo buổi, luồng app đăng nhập → tập → kết quả) và phần chính tuần 4 (coach Claude Haiku + mẫu câu dự phòng, dashboard mục tiêu/streak/đồ thị, lịch sử, deploy Render + Postgres Neon). Chưa làm: kiểm tra góc máy ở màn Sẵn sàng, đăng nhập Google, PWA, squat.
+> **Repo này đã đóng sau hackathon.** Dự án tiếp tục phát triển tại https://github.com/VietHoan225/form-coach
+
+> **Trạng thái (07/11/2026):** **đã deploy**, dùng thử tại **https://form-coach-3r5n.onrender.com** (đăng nhập bằng Google). Xong tuần 1–3 (đếm rep, dataset 5 buổi có nhãn, luật so với random forest chấm theo buổi: macro-F1 0,72 → 0,84, luồng app đăng nhập → tập → kết quả) và tuần 4 (coach Claude Haiku + mẫu câu dự phòng, dashboard mục tiêu/streak/đồ thị, lịch sử, deploy Render + Postgres Neon, đăng nhập Google, giới hạn tải lên và lưu trữ để chống spam). Chưa làm: kiểm tra góc máy ở màn Sẵn sàng, PWA, squat.
 
 > **Mục tiêu chính:** học qua vibe code. Hiểu được thứ AI viết ra quan trọng hơn tốc độ.
 
@@ -13,11 +15,14 @@
 ## Demo và cách chạy
 
 ### Dùng thử (không cần cài gì)
+<!-- TODO: chèn ảnh hoặc video demo (đăng nhập → tập → kết quả → xem lại rep), vd ![Demo](docs/demo.gif) -->
+
 Mở **https://form-coach-3r5n.onrender.com** trên điện thoại → **Tiếp tục với Google** (tài khoản mới chỉ tạo qua Google) → **Quay → Tập** → cho phép camera.
 - Đặt điện thoại **nằm ngang, sát sàn, quay từ bên hông**, cả người nằm trong khung.
 - Server miễn phí **ngủ sau 15 phút** không ai vào: lần mở đầu chờ khoảng 1 phút.
-- Coach do Claude Haiku viết tới hết ngày 09/11/2026 (key của ban tổ chức hết hạn 01:47 ngày 10/11), sau đó tự dùng mẫu câu.
+- Coach do Claude Haiku viết cho đến khi key của ban tổ chức hết hạn (01:47 ngày 10/11/2026), sau đó tự dùng mẫu câu trừ khi server được đặt key riêng.
 - Video **không rời điện thoại**: server chỉ nhận toạ độ các khớp và lưu kết quả.
+- Mỗi hiệp tối đa 30 phút (tự dừng và gửi). Xem lại rep bằng người que được cho 10 phút đầu mỗi hiệp, tối đa 30 phút mỗi 24 giờ; phần sau vẫn được chấm đủ.
 
 ### Chạy ở máy
 Cần: conda, Docker (cho Postgres), Node 24 (qua nvm).
@@ -45,6 +50,7 @@ cd web && npm install && npm run dev
 - Máy tính: mở `https://localhost:5173`. Điện thoại (cùng wifi): `https://<IP-laptop>:5173`, chấp nhận chứng chỉ tự ký một lần. Camera trên điện thoại cần HTTPS, Vite lo phần này và chuyển `/api` sang uvicorn.
 - Chỉ chạy `npm run dev` trên mạng tin cậy: dev server mở ra mạng LAN.
 - Test: `pytest` (test DB cần container `formcoach-pg` đang chạy; thiếu thì các test đó tự bỏ qua). Lint: `ruff check .`.
+- Đăng nhập Google ở máy: đặt `FORMCOACH_GOOGLE_CLIENT_ID` trong `.env` (xem bước 0 của Deploy; origin `https://localhost:5173`). Điện thoại vào `https://<IP-laptop>:5173` không dùng được Google (Google không nhận origin là địa chỉ IP): dùng email hoặc bản deploy.
 - Mô hình: `python -m formcoach train` (cần dữ liệu đã gán nhãn trong `data/`) lưu `models/pushup-rf.pkl`; `python -m tools.upload_model models/pushup-rf.pkl` đưa vào DB để server dùng. Không có mô hình, server tự train từ `data/` ở lần chấm đầu, không có dữ liệu thì dùng luật.
 
 ### Deploy (Render Free + Neon)
@@ -57,7 +63,7 @@ Một Docker image (`Dockerfile`: build web bằng Node, chạy uvicorn phục v
 
 ### Hạn chế của bản deploy
 - **Lần mở đầu chậm.** Render Free cho server ngủ sau 15 phút không có ai truy cập; lần mở tiếp theo phải chờ khoảng 1 phút để server khởi động lại.
-- **Coach chỉ dùng LLM tới 01:47 ngày 10/11/2026**, khi key của ban tổ chức hết hạn. Sau đó app tự dùng mẫu câu: vẫn đúng số liệu nhưng câu chữ cứng hơn.
+- **Coach chỉ dùng LLM đến 01:47 ngày 10/11/2026** (key của ban tổ chức hết hạn), trừ khi server được đặt key riêng. Sau đó app tự dùng mẫu câu: vẫn đúng số liệu nhưng câu chữ cứng hơn.
 - **Dung lượng DB có hạn.** Neon Free có 1 GB. Keypoint mỗi hiệp được nén gzip, khoảng 0,4 MB cho một phút tập, nên DB chứa được khoảng 2.500 phút tập của tất cả người dùng cộng lại.
 - **Không thu dữ liệu train trên bản deploy.** File của hiệp "Quay dữ liệu" và nhãn mà admin gán vẫn ghi ra ổ đĩa, mà Render Free không có ổ lưu lâu dài nên chúng mất mỗi khi server khởi động lại. Vì vậy dữ liệu train vẫn được quay và gán nhãn ở máy, rồi tải mô hình đã train lên DB.
 - **Chưa giới hạn tài nguyên mỗi người.** Ai có link cũng tạo được tài khoản, và chưa có giới hạn số hiệp hay độ dài hiệp mỗi người. Một người dùng có thể làm đầy DB; đủ cho bản demo, chưa đủ để mở rộng rãi.
@@ -429,9 +435,10 @@ Ghi ngày 2026-10-24, **trước khi chạy random forest lần đầu**, để 
 - [x] Tuần 3: app chạy local đủ luồng: đăng nhập → quay → kết quả
 - [x] Tuần 4: coach Claude Haiku (dự phòng mẫu câu), mục tiêu, streak, đồ thị, lịch sử
 - [x] Tuần 4: deploy (Render Free + Postgres Neon), dùng được trên điện thoại qua HTTPS
-- [x] Tuần 4: README phần cách chạy và deploy
-- [ ] Tuần 4: ảnh/video demo trong README, phần hạn chế của bản deploy
-- [ ] Tuần 4 (nếu còn giờ): đăng nhập Google, PWA
+- [x] Tuần 4: README phần cách chạy và deploy, phần hạn chế của bản deploy
+- [ ] Tuần 4: ảnh/video demo trong README
+- [x] Tuần 4: đăng nhập Google (tài khoản mới chỉ qua Google), giới hạn tải lên/lưu trữ, định dạng hiệp v2
+- [ ] Tuần 4 (nếu còn giờ): PWA
 
 ---
 
@@ -520,7 +527,9 @@ Ghi ngày 2026-10-24, **trước khi chạy random forest lần đầu**, để 
 - [x] Lập plan tuần 3 (plan mode): ngưỡng học trên tập train + random forest, luồng app
 - [x] Tuần 3: random forest so với luật (chấm theo buổi), backend FastAPI + DB + đăng nhập, đếm rep realtime, trang kết quả + xem lại rep
 - [x] Tuần 4: dashboard mục tiêu/streak/đồ thị, lịch sử, coach Claude Haiku, deploy Render + Neon (chuyển SQLite sang Postgres), README cách chạy
-- [ ] Ảnh/video demo, phần hạn chế của bản deploy
-- [ ] Kiểm tra góc máy ở màn Sẵn sàng (cần quay thí nghiệm trước)
-- [ ] (Nếu còn giờ) đăng nhập Google, PWA
+- [x] Phần hạn chế của bản deploy
+- [x] Đăng nhập Google, chống spam (giới hạn tải lên và lưu keypoint), định dạng hiệp v2 (keypoint nhị phân, server đỡ RAM)
+- [ ] Ảnh/video demo
+- [ ] Kiểm tra góc máy ở màn Sẵn sàng (cần quay thí nghiệm trước: kịch bản đã soạn)
+- [ ] (Nếu còn giờ) PWA
 - [ ] (Mở rộng) squat
