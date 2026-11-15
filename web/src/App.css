@@ -173,25 +173,58 @@ fieldset {
 }
 
 .main-nav {
+  position: relative;
+  isolation: isolate;
   display: flex;
-  gap: 24px;
+  gap: 4px;
   font-size: var(--text-body-sm);
 }
 
 .main-nav a {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  padding: 20px 0 18px;
+  justify-content: center;
+  min-height: var(--size-touch);
+  margin: 8px 0;
+  padding: 0 14px;
+  border-radius: var(--radius-input);
   color: var(--color-ink2);
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
-  border-bottom: 2px solid transparent;
+  transition: transform var(--motion-fast) var(--motion-ease);
+}
+
+/* Một nền chọn dùng chung; NavIndicator đo vị trí và animate transform giữa các tab. */
+.nav-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--radius-input);
+  background: var(--color-chip);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.nav-indicator::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 3px;
+  border-radius: var(--radius-segment);
+  background: var(--color-accent);
 }
 
 .main-nav a[aria-current='page'] {
   color: var(--color-ink);
-  font-weight: 600;
-  border-bottom-color: var(--color-accent);
+}
+
+.main-nav a:active {
+  transform: scale(0.97);
 }
 
 /* Máy tính: chỉ chữ, không icon. */
@@ -239,9 +272,9 @@ fieldset {
     right: 0;
     bottom: 0;
     z-index: 10;
-    gap: 0;
+    gap: 8px;
     align-items: flex-end;
-    padding: 6px 24px calc(10px + env(safe-area-inset-bottom));
+    padding: 6px 16px calc(10px + env(safe-area-inset-bottom));
     background: var(--color-card);
     border-top: 1px solid var(--color-line);
     font-size: var(--text-caption);
@@ -255,9 +288,12 @@ fieldset {
     flex: 1;
     flex-direction: column;
     gap: 4px;
-    padding: 8px 0 0;
-    border-bottom: 0;
-    font-weight: 500;
+    margin: 0;
+    padding: 8px 0;
+  }
+
+  .nav-indicator::after {
+    display: none;
   }
 
   .main-nav svg {
@@ -269,7 +305,7 @@ fieldset {
   }
 
   /* Nút Quay tròn nổi giữa thanh (canvas): vòng nền `bg` tách nút khỏi thanh. */
-  .nav-capture {
+  .main-nav .nav-capture {
     margin-top: -26px;
     color: var(--color-ink);
     font-weight: 600;
@@ -1934,28 +1970,24 @@ main .train-panel h1 {
   background: var(--color-tint);
 }
 
-.dashboard > * {
-  animation: enter var(--motion-slow) var(--motion-ease) both;
+/* Chỉ hiện dần, không transform khung màn: camera/modal position: fixed vẫn bám viewport.
+   Màn Quay/Gán nhãn vẫn được giữ trong DOM; bỏ hidden sẽ chạy lại hiệu ứng. */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.dashboard > :nth-child(2) {
-  animation-delay: 60ms;
-}
-
-.result > * {
-  animation: enter var(--motion-slow) var(--motion-ease) both;
-}
-
-.result > :nth-child(2) {
-  animation-delay: 60ms;
-}
-
-.result > :nth-child(3) {
-  animation-delay: 120ms;
-}
-
-.result > :nth-child(n + 4) {
-  animation-delay: 180ms;
+.dashboard,
+.history,
+.result,
+.not-found,
+.admin-only,
+.page-panel:not([hidden]) {
+  animation: page-enter var(--motion-base) var(--motion-ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1968,6 +2000,17 @@ main .train-panel h1 {
 }
 
 /* Link công cụ dữ liệu mở khi không phải admin (D0d). */
+.not-found,
+.app-error {
+  max-width: 640px;
+  margin: var(--space-page) auto;
+}
+
+.not-found h1,
+.app-error h1 {
+  font-size: var(--text-title);
+}
+
 .admin-only {
   max-width: 640px;
   margin: 24px auto;

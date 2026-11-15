@@ -9,6 +9,7 @@ import HistoryView from './components/HistoryView'
 import { parseAuditHash } from './label/audit'
 import LabelView from './components/LabelView'
 import LoginView from './components/LoginView'
+import NavIndicator from './components/NavIndicator'
 import QuickLabel from './components/QuickLabel'
 import ResultView from './components/ResultView'
 import ThemeToggle from './components/ThemeToggle'
@@ -16,25 +17,55 @@ import TrainView from './components/TrainView'
 import { UNAUTHORIZED_EVENT } from './http'
 import './App.css'
 
-type Tab = 'dashboard' | 'capture' | 'history' | 'label' | 'quick' | 'result' | 'audit'
+type Tab = 'dashboard' | 'capture' | 'history' | 'label' | 'quick' | 'result' | 'audit' | 'not-found'
+
+const TAB_TITLES: Record<Tab, string> = {
+  dashboard: 'Dashboard',
+  capture: 'Tập',
+  history: 'Lịch sử',
+  label: 'Gán nhãn',
+  quick: 'Gán nhãn nhanh',
+  result: 'Kết quả',
+  audit: 'Kiểm tra nhãn',
+  'not-found': 'Không tìm thấy trang',
+}
 
 // Tab lưu trên URL (#label) để tải lại trang vẫn ở đúng màn; không cần thư viện router.
 // Không có hash (vừa mở app) → Dashboard.
 function tabFromHash(): Tab {
   const hash = window.location.hash
+  if (hash === '' || hash === '#dashboard') return 'dashboard'
   if (hash.startsWith('#result/')) return 'result'
   // Gán lại mù: chỉ mở bằng link do `python -m evaluation.relabel_consistency sample` in ra.
   if (hash.startsWith('#audit/')) return 'audit'
   if (hash === '#capture') return 'capture'
   if (hash === '#history') return 'history'
   if (hash === '#label') return 'label'
-  return hash === '#quick' ? 'quick' : 'dashboard'
+  return hash === '#quick' ? 'quick' : 'not-found'
 }
 
 /** `#result/<exercise>/<session_id>` → hai phần, hoặc null nếu hash không đúng dạng. */
 function resultFromHash(): { exercise: string; sessionId: string } | null {
-  const m = window.location.hash.match(/^#result\/([^/]+)\/(.+)$/)
-  return m ? { exercise: m[1], sessionId: decodeURIComponent(m[2]) } : null
+  const m = window.location.hash.match(/^#result\/([^/]+)\/([^/]+)$/)
+  if (!m) return null
+  try {
+    return { exercise: m[1], sessionId: decodeURIComponent(m[2]) }
+  } catch {
+    // Link có mã phần trăm hỏng: hiện màn không tìm thấy thay vì làm lỗi cả app.
+    return null
+  }
+}
+
+function NotFound() {
+  return (
+    <section className="not-found card" aria-labelledby="not-found-title">
+      <h1 id="not-found-title">Không tìm thấy trang</h1>
+      <p className="hint">Liên kết không hợp lệ. Bạn có thể về Dashboard để tiếp tục.</p>
+      <a className="text-button" href="/#dashboard">
+        Về Dashboard
+      </a>
+    </section>
+  )
 }
 
 /** Màn công cụ dữ liệu mở bằng link trực tiếp khi không phải admin (server cũng trả 403). */
@@ -74,6 +105,19 @@ export default function App() {
   const [quickOpened, setQuickOpened] = useState(tab === 'quick')
 
   useEffect(() => {
+    let title: string | null = null
+    if (window.location.pathname !== '/') title = TAB_TITLES['not-found']
+    else if (user === null || sessionExpired) title = 'Đăng nhập'
+    else if (user) {
+      if (tab === 'result' && !resultTarget) title = TAB_TITLES['not-found']
+      else if (!user.is_admin && (tab === 'label' || tab === 'quick' || tab === 'audit')) title = 'Không có quyền truy cập'
+      else if (tab === 'capture' && user.is_admin && captureMode === 'data') title = 'Quay dữ liệu'
+      else title = TAB_TITLES[tab]
+    }
+    document.title = title ? `${title} · Form Coach` : 'Form Coach'
+  }, [user, sessionExpired, tab, resultTarget, captureMode])
+
+  useEffect(() => {
     const onHash = () => {
       const next = tabFromHash()
       setTab(next)
@@ -86,6 +130,8 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    // Vite có thể trả app cho đường dẫn lạ. Màn 404 công khai không cần gọi API đăng nhập.
+    if (window.location.pathname !== '/') return
     // Hỏi cả hai trước khi vẽ, để nút "Tạo tài khoản" không hiện ra rồi biến mất.
     // Không hỏi được server: vẫn hiện màn đăng nhập; lỗi kết nối hiện trong form khi bấm gửi
     // (không giữ một dòng báo lỗi cũ, dễ mâu thuẫn khi server chạy lại).
@@ -101,6 +147,12 @@ export default function App() {
     window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
     return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
   }, [])
+
+  // App chỉ định tuyến bằng hash ở `/`; đường dẫn thật khác không phải Dashboard.
+  // Kiểm tra trước cổng đăng nhập để link sai vẫn có thông báo khi chưa đăng nhập.
+  if (window.location.pathname !== '/') {
+    return <main><NotFound /></main>
+  }
 
   // Cổng đăng nhập: chưa biết thì không vẽ gì (tránh nháy màn đăng nhập khi đã đăng nhập),
   // chưa đăng nhập thì chỉ có màn đăng nhập. Mọi màn bên dưới đều cần cookie phiên.
@@ -159,6 +211,7 @@ export default function App() {
           Dashboard
         </a>
         <nav className="main-nav" aria-label="Điều hướng chính">
+          <NavIndicator activeTab={tab} />
           <a href="#dashboard" aria-current={tab === 'dashboard' ? 'page' : undefined}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden="true">
               <rect x="3" y="3" width="7" height="9" rx="1.5" />
@@ -211,9 +264,10 @@ export default function App() {
       {tab === 'dashboard' && <DashboardView />}
       {/* Gắn lại mỗi lần mở tab, như Dashboard: thấy ngay hiệp vừa tập. */}
       {tab === 'history' && <HistoryView admin={admin} />}
+      {(tab === 'not-found' || (tab === 'result' && !resultTarget)) && <NotFound />}
       {/* Màn Quay chỉ bị ẩn, không bị gỡ: gỡ ra sẽ mất danh sách hiệp chưa gửi (nằm trong
           state của CaptureView) và tắt camera giữa chừng. */}
-      <div hidden={tab !== 'capture'}>
+      <div className="page-panel" hidden={tab !== 'capture'}>
         {/* Tập (app) và Quay dữ liệu (công cụ thu dataset, chỉ admin) như canvas. Cả hai luôn gắn, chỉ ẩn
             cái không chọn: đổi chế độ không làm mất hiệp chưa gửi của chế độ kia. */}
         {admin && (
@@ -242,7 +296,7 @@ export default function App() {
       </div>
       {!admin && dataTab && <AdminOnly />}
       {admin && labelOpened && (
-        <div hidden={tab !== 'label'}>
+        <div className="page-panel" hidden={tab !== 'label'}>
           <h1>Form Coach — gán nhãn rep</h1>
           <p className="hint">
             <a href="#quick">Gán nhanh (v2) →</a>
@@ -251,7 +305,7 @@ export default function App() {
         </div>
       )}
       {admin && quickOpened && (
-        <div hidden={tab !== 'quick'}>
+        <div className="page-panel" hidden={tab !== 'quick'}>
           <h1>Form Coach — gán nhãn nhanh (v2)</h1>
           <p className="hint">
             <a href="#label">← Gán nhãn từng rep</a>
@@ -259,7 +313,7 @@ export default function App() {
           <QuickLabel />
         </div>
       )}
-      {admin && tab === 'audit' && <AuditRoute />}
+      {admin && tab === 'audit' && <div className="page-panel"><AuditRoute /></div>}
       {/* Trang kết quả gắn theo hiệp (key): đổi hiệp thì tải lại từ đầu. */}
       {tab === 'result' && resultTarget && (
         <ResultView

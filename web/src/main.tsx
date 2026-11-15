@@ -8,13 +8,18 @@ import '@fontsource/inter/700.css'
 import './theme.css'
 import './index.css'
 import App from './App.tsx'
-import { applyTheme, storedTheme } from './theme'
+import ErrorBoundary from './components/ErrorBoundary'
+import { applyTheme, onSystemThemeChange, storedTheme } from './theme'
 
 // Đặt chế độ đã chọn trước khi vẽ lần đầu, để không nháy sáng rồi mới tối.
 applyTheme(storedTheme())
+// Đồng bộ metadata cả ở màn không có nút đổi giao diện (404, lỗi render).
+onSystemThemeChange(() => applyTheme(storedTheme()))
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 )

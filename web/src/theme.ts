@@ -1,5 +1,6 @@
 // Chế độ sáng/tối và đọc token màu cho canvas. Màu nằm ở theme.css (chép từ DESIGN.md);
-// file này chỉ bật/tắt thuộc tính data-theme trên <html> và nhớ lựa chọn trong trình duyệt.
+// Đồng bộ data-theme, màu thanh trình duyệt và favicon; nhớ lựa chọn trong trình duyệt.
+import favicon from '../public/favicon.svg?raw'
 
 export type Theme = 'light' | 'dark'
 
@@ -20,6 +21,14 @@ export function storedTheme(): Theme | null {
 export function applyTheme(theme: Theme | null): void {
   if (theme) document.documentElement.dataset.theme = theme
   else delete document.documentElement.dataset.theme
+  // Metadata và ảnh SVG độc lập không kế thừa biến CSS: truyền giá trị token hiện tại vào.
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+  if (meta) meta.content = cssVar('color-bg')
+  const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+  if (icon) {
+    const style = `--color-accent:${cssVar('color-accent')};--color-on-accent:${cssVar('color-on-accent')}`
+    icon.href = `data:image/svg+xml,${encodeURIComponent(favicon.replace('<svg ', `<svg style="${style}" `))}`
+  }
 }
 
 /** Chế độ đang hiển thị (đã chọn tay, hoặc theo máy). */

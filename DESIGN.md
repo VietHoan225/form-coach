@@ -168,6 +168,7 @@ Chữ từ 24px trở lên: `letter-spacing` −0,02em (số lớn −0,03em).
 - **Segmented** (Đăng nhập / Tạo tài khoản; Tập / Quay dữ liệu): nền `track`, nút đang chọn nền `card`.
 - **Thẻ:** nền `card`, bo 22, đệm 18–20, không viền, không bóng.
 - **Thanh điều hướng dưới** (điện thoại): Dashboard · Quay (nút tròn 60px nền `accent` nổi giữa) · Lịch sử. Chỉ việc của người tập; Gán nhãn (admin) nằm ở thanh trên máy tính và link cuối màn Lịch sử.
+- **Tab đang chọn:** chữ `ink`, một nền `chip` dùng chung bo `input` trượt từ tab cũ sang tab mới trong `motion.slow` (320ms); trên máy tính có thêm gạch ngắn `accent` đi cùng nền, trên điện thoại icon đổi sang `accent`. Đo tọa độ thật của link, animate translate/scale bằng Web Animations API (FLIP), không animate layout; bấm nhanh tiếp tục từ vị trí đang chạy. Cập nhật vị trí khi đổi kích thước/font; reduced motion đổi ngay. Chữ các tab cùng độ đậm 600 để đổi tab không xê dịch bố cục. Nút Quay giữ hình tròn hiện có; phản hồi bấm bằng scale 0,97 trong `motion.fast`.
 - **Lịch sử** (không có trong canvas, bạn chọn bản B): thẻ lịch tháng (‹ Tháng 10, 2026 ›, hàng T2…CN), ô ngày tròn ≥ 44px: đạt mục tiêu nền `accent` chữ `on-accent`, có tập chưa đạt nền `tint`, không tập không nền, ngày tương lai mờ không bấm được, ngày đang chọn vòng trong 2px `ink`; chú giải như đồ thị Dashboard. Thẻ dưới: ngày đang chọn, tổng hiệp/rep/đúng, mỗi hiệp một dòng (giờ · rep · thời lượng · ›) mở trang kết quả.
 - **Icon:** nét (stroke) 2px, đầu tròn, cùng màu chữ; nút chỉ có icon phải có `aria-label`.
 - **Tấm giới thiệu** (đăng nhập, máy tính): nền `stage`, bo 28; khẩu hiệu, người que ở đáy push-up với cung đo góc khuỷu 90° (xương `skeleton-bone`, khớp và số đo `skeleton-joint`), một dòng giải thích. Cao theo nội dung, căn giữa theo chiều dọc với form. Không glow, không gradient.
@@ -185,6 +186,7 @@ Chuyển động để báo trạng thái, không để trang trí. Ngắn, đi 
 | `ease` | `cubic-bezier(0.2, 0.8, 0.2, 1)` | Đường cong chung: nhanh lúc đầu, chậm dần |
 
 - Chỉ animate `opacity` và `transform` (không animate kích thước, không gây giật bố cục).
+- Chuyển giữa các màn chính: hiện dần bằng opacity trong `motion.base` (200ms), không xếp trễ từng thẻ. Không transform khung bao màn để camera và hộp xem lại rep dùng `position: fixed` vẫn bám viewport; không remount màn Quay/Gán nhãn để tạo hiệu ứng.
 - `prefers-reduced-motion: reduce`: tắt hết animation và transition, hiện ngay trạng thái cuối.
 - Mọi thứ bấm được có `:focus-visible` rõ (viền 2px `accent`); không bỏ viền focus.
 
