@@ -117,7 +117,13 @@ export default function App() {
       title = tab === 'login' ? 'Đăng nhập' : 'Giới thiệu'
     }
     else if (user) {
-      if (tab === 'result' && !resultTarget) title = TAB_TITLES['not-found']
+      if (tab === 'result') {
+        if (!resultTarget) title = TAB_TITLES['not-found']
+        else {
+          const ex = resultTarget.exercise === 'pushup' ? 'push-up' : resultTarget.exercise
+          title = `Kết quả ${ex}`
+        }
+      }
       else if (!user.is_admin && (tab === 'label' || tab === 'quick' || tab === 'audit')) title = 'Không có quyền truy cập'
       else if (tab === 'capture' && user.is_admin && captureMode === 'data') title = 'Quay dữ liệu'
       else title = TAB_TITLES[tab]

@@ -1,4 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    :root {
+      --color-accent: #0E7A4B;
+      --color-on-accent: #FFFFFF;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-accent: #4CD08A;
+        --color-on-accent: #06180F;
+      }
+    }
+  </style>
   <rect width="32" height="32" rx="8" fill="var(--color-accent, CanvasText)" />
   <g transform="translate(4 4)" fill="none" stroke="var(--color-on-accent, Canvas)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <polyline points="5,19 12,6 19,19" />

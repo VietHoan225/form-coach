@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import ThemeToggle from './ThemeToggle'
 import './LandingView.css'
 
@@ -208,14 +209,19 @@ export default function LandingView({ onStart, onLoginClick, isLoggedIn = false 
     }
   }
 
-  // Phím Escape đóng modal quyền riêng tư nếu đang mở
+  // Phím Escape đóng modal quyền riêng tư nếu đang mở & khoá cuộn trang nền
   useEffect(() => {
     if (!showPrivacyModal) return
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setShowPrivacyModal(false)
     }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = prevOverflow
+    }
   }, [showPrivacyModal])
 
   return (
@@ -457,89 +463,91 @@ export default function LandingView({ onStart, onLoginClick, isLoggedIn = false 
         </div>
       </footer>
 
-      {/* Modal Quyền riêng tư & Điều khoản */}
-      {showPrivacyModal && (
-        <div
-          className="landing-modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="privacy-modal-title"
-          onClick={() => setShowPrivacyModal(false)}
-        >
-          <div className="landing-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="landing-modal-header">
-              <h2 id="privacy-modal-title" className="landing-modal-title">
-                Cam kết Quyền riêng tư & Điều khoản
-              </h2>
-              <button
-                type="button"
-                className="landing-modal-close"
-                onClick={() => setShowPrivacyModal(false)}
-                aria-label="Đóng hộp thoại"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="landing-modal-body">
-              <div className="landing-modal-item">
-                <span className="landing-modal-badge" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="4" y="11" width="16" height="10" rx="2" />
-                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-                  </svg>
-                </span>
-                <div>
-                  <h3 className="landing-modal-item-title">Video không bao giờ rời khỏi máy của bạn</h3>
-                  <p className="landing-modal-item-desc">
-                    Trình duyệt sử dụng mô hình Google MediaPipe trích xuất toạ độ 33 khớp xương trực tiếp trong RAM của thiết bị. Không có bất kỳ video, hình ảnh hay khuôn mặt nào được ghi âm, ghi hình hay gửi lên máy chủ đám mây.
-                  </p>
-                </div>
+      {/* Modal Quyền riêng tư & Điều khoản (Portal ra ngoài document.body để luôn bám chuẩn viewport) */}
+      {showPrivacyModal &&
+        createPortal(
+          <div
+            className="landing-modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="privacy-modal-title"
+            onClick={() => setShowPrivacyModal(false)}
+          >
+            <div className="landing-modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="landing-modal-header">
+                <h2 id="privacy-modal-title" className="landing-modal-title">
+                  Cam kết Quyền riêng tư & Điều khoản
+                </h2>
+                <button
+                  type="button"
+                  className="landing-modal-close"
+                  onClick={() => setShowPrivacyModal(false)}
+                  aria-label="Đóng hộp thoại"
+                >
+                  ✕
+                </button>
               </div>
+              <div className="landing-modal-body">
+                <div className="landing-modal-item">
+                  <span className="landing-modal-badge" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="4" y="11" width="16" height="10" rx="2" />
+                      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="landing-modal-item-title">Video không bao giờ rời khỏi máy của bạn</h3>
+                    <p className="landing-modal-item-desc">
+                      Trình duyệt sử dụng mô hình Google MediaPipe trích xuất toạ độ 33 khớp xương trực tiếp trong RAM của thiết bị. Không có bất kỳ video, hình ảnh hay khuôn mặt nào được ghi âm, ghi hình hay gửi lên máy chủ đám mây.
+                    </p>
+                  </div>
+                </div>
 
-              <div className="landing-modal-item">
-                <span className="landing-modal-badge" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="20" x2="18" y2="10" />
-                    <line x1="12" y1="20" x2="12" y2="4" />
-                    <line x1="6" y1="20" x2="6" y2="14" />
-                  </svg>
-                </span>
-                <div>
-                  <h3 className="landing-modal-item-title">Dữ liệu lưu trữ tối thiểu & minh bạch</h3>
-                  <p className="landing-modal-item-desc">
-                    Khi lưu hiệp tập, máy chủ chỉ nhận các toạ độ khớp xương dạng số nén để tính góc khuỷu và lưu lịch sử rèn luyện cho riêng tài khoản của bạn. Bạn có toàn quyền xem lại hoặc xóa tài khoản kèm toàn bộ dữ liệu.
-                  </p>
+                <div className="landing-modal-item">
+                  <span className="landing-modal-badge" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="20" x2="18" y2="10" />
+                      <line x1="12" y1="20" x2="12" y2="4" />
+                      <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="landing-modal-item-title">Dữ liệu lưu trữ tối thiểu & minh bạch</h3>
+                    <p className="landing-modal-item-desc">
+                      Khi lưu hiệp tập, máy chủ chỉ nhận các toạ độ khớp xương dạng số nén để tính góc khuỷu và lưu lịch sử rèn luyện cho riêng tài khoản của bạn. Bạn có toàn quyền xem lại hoặc xóa tài khoản kèm toàn bộ dữ liệu.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="landing-modal-item">
-                <span className="landing-modal-badge" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                </span>
-                <div>
-                  <h3 className="landing-modal-item-title">Miễn trừ y tế & an toàn thể thao</h3>
-                  <p className="landing-modal-item-desc">
-                    Form Coach là công cụ AI hỗ trợ theo dõi kỹ thuật, không thể thay thế huấn luyện viên thể hình trực tiếp hay tư vấn của bác sĩ y khoa. Hãy khởi động kỹ và dừng tập ngay nếu cảm thấy đau khớp hoặc choáng váng.
-                  </p>
+                <div className="landing-modal-item">
+                  <span className="landing-modal-badge" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="landing-modal-item-title">Miễn trừ y tế & an toàn thể thao</h3>
+                    <p className="landing-modal-item-desc">
+                      Form Coach là công cụ AI hỗ trợ theo dõi kỹ thuật, không thể thay thế huấn luyện viên thể hình trực tiếp hay tư vấn của bác sĩ y khoa. Hãy khởi động kỹ và dừng tập ngay nếu cảm thấy đau khớp hoặc choáng váng.
+                    </p>
+                  </div>
                 </div>
               </div>
+              <div className="landing-modal-footer">
+                <button
+                  type="button"
+                  className="landing-modal-btn"
+                  onClick={() => setShowPrivacyModal(false)}
+                >
+                  Đã hiểu
+                </button>
+              </div>
             </div>
-            <div className="landing-modal-footer">
-              <button
-                type="button"
-                className="landing-modal-btn"
-                onClick={() => setShowPrivacyModal(false)}
-              >
-                Đã hiểu
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }
