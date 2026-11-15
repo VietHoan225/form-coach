@@ -1,6 +1,6 @@
 // Màn đăng nhập / tạo tài khoản, theo canvas "Đăng nhập" (DESIGN.md). Điện thoại: một cột;
 // máy tính (rộng ≥ 900px): thêm tấm giới thiệu nền tối bên trái.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { AuthError, submitCredentials, submitGoogle } from '../auth/api'
 import type { AuthMode, User } from '../auth/api'
@@ -15,6 +15,7 @@ interface Props {
   onLoggedIn: (user: User) => void
   // Phiên hết hạn giữa chừng: vẽ đè lên app (các màn bên dưới vẫn giữ nguyên), kèm lời giải thích.
   overlay?: boolean
+  onBackToLanding?: () => void
 }
 
 export default function LoginView({ allowRegister, googleClientId, onLoggedIn, overlay = false }: Props) {
@@ -28,6 +29,18 @@ export default function LoginView({ allowRegister, googleClientId, onLoggedIn, o
   const [submitted, setSubmitted] = useState(false)
   const [serverField, setServerField] = useState<FieldErrors>({}) // vd email đã có tài khoản
   const [formError, setFormError] = useState<string | null>(null)
+
+  // Bấm Escape ở màn đăng nhập thì quay lại Landing Page (trừ khi đang là popup phiên hết hạn).
+  useEffect(() => {
+    if (overlay) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        window.location.hash = '#landing'
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [overlay])
 
   const fieldErrors: FieldErrors = submitted
     ? { ...validateCredentials(mode, email, password, confirm), ...serverField }
@@ -89,16 +102,36 @@ export default function LoginView({ allowRegister, googleClientId, onLoggedIn, o
       {...(overlay && { role: 'dialog', 'aria-modal': true, 'aria-labelledby': 'login-expired' })}
     >
       <header className="login-top">
-        <span className="login-brand">
+        <a href="#landing" className="login-brand" aria-label="Form Coach - Trang chủ">
           <span className="login-logo small" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="5,19 12,6 19,19" />
               <path d="M9 12.8A4 4 0 0 0 15 12.8" />
             </svg>
           </span>
-          Form Coach
-        </span>
-        <ThemeToggle />
+          <span>Form Coach</span>
+        </a>
+
+        {!overlay && (
+          <a href="#landing" className="login-back-link login-back-mobile" aria-label="Quay lại trang chủ">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            <span>Quay lại</span>
+          </a>
+        )}
+
+        <div className="login-top-actions">
+          {!overlay && (
+            <a href="#landing" className="login-back-link login-back-desktop" aria-label="Quay lại trang chủ">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              <span>Quay lại</span>
+            </a>
+          )}
+          <ThemeToggle />
+        </div>
       </header>
 
       <div className="login-body">
