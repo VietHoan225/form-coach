@@ -1,0 +1,409 @@
+/* Giao diện Landing Page (DESIGN.md) */
+.landing-view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+/* Header */
+.landing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px var(--space-page);
+  max-width: 1080px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.landing-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: var(--text-heading);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.landing-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-segment);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.landing-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-login-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-button);
+  border: 1px solid var(--color-line);
+  background: var(--color-card);
+  color: var(--color-ink);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--motion-fast) var(--motion-ease), border-color var(--motion-fast) var(--motion-ease);
+}
+
+.landing-login-btn:hover {
+  border-color: var(--color-ink2);
+}
+
+/* Container chung các section */
+.landing-container {
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-page);
+  box-sizing: border-box;
+}
+
+/* Hero Section */
+.landing-hero {
+  padding: 48px 0 64px;
+  text-align: center;
+}
+
+.landing-hero-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: var(--radius-button);
+  background-color: var(--color-chip);
+  color: var(--color-accent);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.landing-hero-title {
+  font-size: var(--text-display);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--color-ink);
+  margin: 0 0 20px 0;
+  letter-spacing: -0.02em;
+}
+
+.landing-hero-desc {
+  font-size: var(--text-button);
+  line-height: 1.5;
+  color: var(--color-ink2);
+  max-width: 620px;
+  margin: 0 auto 32px;
+}
+
+.landing-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.landing-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-button);
+  padding: 0 32px;
+  border-radius: var(--radius-button);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--text-button);
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(14, 122, 75, 0.25);
+  transition: transform var(--motion-fast) var(--motion-ease), opacity var(--motion-fast) var(--motion-ease);
+}
+
+.landing-cta-primary:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+}
+
+.landing-cta-primary:active {
+  transform: translateY(0);
+}
+
+.landing-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-button);
+  padding: 0 24px;
+  border-radius: var(--radius-button);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-card);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--motion-fast) var(--motion-ease);
+}
+
+.landing-cta-secondary:hover {
+  border-color: var(--color-ink2);
+}
+
+.landing-trust-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: var(--text-label);
+  color: var(--color-ink2);
+}
+
+.landing-trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.landing-trust-item svg {
+  color: var(--color-accent);
+}
+
+/* Section Cách hoạt động */
+.landing-section {
+  padding: 64px 0;
+  border-top: 1px solid var(--color-line);
+}
+
+.landing-section-header {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.landing-section-eyebrow {
+  display: block;
+  font-size: var(--text-label);
+  font-weight: 700;
+  color: var(--color-accent);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.landing-section-title {
+  font-size: var(--text-title);
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 12px 0;
+}
+
+.landing-section-subtitle {
+  font-size: var(--text-body);
+  color: var(--color-ink2);
+  margin: 0;
+}
+
+/* Grid 3 bước */
+.landing-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.landing-step-card {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-card);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-segment);
+  background-color: var(--color-chip);
+  color: var(--color-accent);
+  font-size: var(--text-heading);
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.landing-step-title {
+  font-size: var(--text-button);
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 8px 0;
+}
+
+.landing-step-desc {
+  font-size: var(--text-body-sm);
+  color: var(--color-ink2);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Grid Tính năng / Cam kết */
+.landing-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.landing-feature-card {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-card);
+  box-sizing: border-box;
+}
+
+.landing-feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-icon);
+  background-color: var(--color-chip);
+  color: var(--color-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.landing-feature-title {
+  font-size: var(--text-button);
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 8px 0;
+}
+
+.landing-feature-desc {
+  font-size: var(--text-body-sm);
+  color: var(--color-ink2);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Call to action cuối trang */
+.landing-banner {
+  background-color: var(--color-hero-bg);
+  border-radius: var(--radius-hero);
+  padding: 48px var(--space-card);
+  text-align: center;
+  color: var(--color-skeleton-joint);
+  margin-bottom: 64px;
+}
+
+.landing-banner-title {
+  font-size: var(--text-title);
+  font-weight: 800;
+  color: var(--color-skeleton-joint);
+  margin: 0 0 12px 0;
+}
+
+.landing-banner-desc {
+  font-size: var(--text-body);
+  color: var(--color-skeleton-joint);
+  opacity: 0.75;
+  max-width: 520px;
+  margin: 0 auto 28px;
+}
+
+.landing-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-button);
+  padding: 0 36px;
+  border-radius: var(--radius-button);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--text-button);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+/* Footer */
+.landing-footer {
+  border-top: 1px solid var(--color-line);
+  padding: 32px var(--space-page);
+  text-align: center;
+  font-size: var(--text-caption);
+  color: var(--color-ink2);
+}
+
+.landing-disclaimer {
+  max-width: 640px;
+  margin: 0 auto 16px;
+  line-height: 1.4;
+}
+
+.landing-footer-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.landing-footer-links a {
+  color: var(--color-ink2);
+  text-decoration: underline;
+}
+
+.landing-footer-links a:hover {
+  color: var(--color-ink);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .landing-hero {
+    padding: 36px 0 44px;
+  }
+
+  .landing-hero-title {
+    font-size: var(--text-title-lg);
+  }
+
+  .landing-hero-desc {
+    font-size: var(--text-body);
+  }
+
+  .landing-steps-grid,
+  .landing-features-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .landing-banner {
+    padding: 36px 20px;
+    border-radius: var(--radius-card);
+  }
+
+  .landing-banner-title {
+    font-size: var(--text-headline);
+  }
+}

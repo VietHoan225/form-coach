@@ -8,6 +8,7 @@ import DashboardView from './components/DashboardView'
 import HistoryView from './components/HistoryView'
 import { parseAuditHash } from './label/audit'
 import LabelView from './components/LabelView'
+import LandingView from './components/LandingView'
 import LoginView from './components/LoginView'
 import NavIndicator from './components/NavIndicator'
 import QuickLabel from './components/QuickLabel'
@@ -17,9 +18,11 @@ import TrainView from './components/TrainView'
 import { UNAUTHORIZED_EVENT } from './http'
 import './App.css'
 
-type Tab = 'dashboard' | 'capture' | 'history' | 'label' | 'quick' | 'result' | 'audit' | 'not-found'
+type Tab = 'landing' | 'login' | 'dashboard' | 'capture' | 'history' | 'label' | 'quick' | 'result' | 'audit' | 'not-found'
 
 const TAB_TITLES: Record<Tab, string> = {
+  landing: 'Giới thiệu',
+  login: 'Đăng nhập',
   dashboard: 'Dashboard',
   capture: 'Tập',
   history: 'Lịch sử',
@@ -31,9 +34,11 @@ const TAB_TITLES: Record<Tab, string> = {
 }
 
 // Tab lưu trên URL (#label) để tải lại trang vẫn ở đúng màn; không cần thư viện router.
-// Không có hash (vừa mở app) → Dashboard.
+// Không có hash (vừa mở app) → Dashboard (hoặc Landing khi chưa đăng nhập).
 function tabFromHash(): Tab {
   const hash = window.location.hash
+  if (hash === '#landing') return 'landing'
+  if (hash === '#login') return 'login'
   if (hash === '' || hash === '#dashboard') return 'dashboard'
   if (hash.startsWith('#result/')) return 'result'
   // Gán lại mù: chỉ mở bằng link do `python -m evaluation.relabel_consistency sample` in ra.
@@ -107,7 +112,10 @@ export default function App() {
   useEffect(() => {
     let title: string | null = null
     if (window.location.pathname !== '/') title = TAB_TITLES['not-found']
-    else if (user === null || sessionExpired) title = 'Đăng nhập'
+    else if (sessionExpired) title = 'Đăng nhập'
+    else if (user === null) {
+      title = tab === 'login' ? 'Đăng nhập' : 'Giới thiệu'
+    }
     else if (user) {
       if (tab === 'result' && !resultTarget) title = TAB_TITLES['not-found']
       else if (!user.is_admin && (tab === 'label' || tab === 'quick' || tab === 'audit')) title = 'Không có quyền truy cập'
@@ -148,18 +156,58 @@ export default function App() {
     return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
   }, [])
 
+  useEffect(() => {
+    if (user && tab === 'login') {
+      window.location.hash = '#dashboard'
+    }
+  }, [user, tab])
+
   // App chỉ định tuyến bằng hash ở `/`; đường dẫn thật khác không phải Dashboard.
   // Kiểm tra trước cổng đăng nhập để link sai vẫn có thông báo khi chưa đăng nhập.
   if (window.location.pathname !== '/') {
     return <main><NotFound /></main>
   }
 
-  // Cổng đăng nhập: chưa biết thì không vẽ gì (tránh nháy màn đăng nhập khi đã đăng nhập),
-  // chưa đăng nhập thì chỉ có màn đăng nhập. Mọi màn bên dưới đều cần cookie phiên.
+  // Cổng đăng nhập / giới thiệu: chưa biết thì không vẽ gì (tránh nháy màn khi đã đăng nhập).
+  // Chưa đăng nhập: hash #login hiện LoginView, các hash khác hiện LandingView (kèm nút Đăng nhập).
   if (user === undefined) return null
   if (user === null) {
+    if (tab === 'login') {
+      return (
+        <LoginView
+          allowRegister={authOptions.allowRegister}
+          googleClientId={authOptions.googleClientId}
+          onLoggedIn={(u) => {
+            setUser(u)
+            window.location.hash = '#dashboard'
+          }}
+        />
+      )
+    }
     return (
-      <LoginView allowRegister={authOptions.allowRegister} googleClientId={authOptions.googleClientId} onLoggedIn={setUser} />
+      <LandingView
+        onStart={() => {
+          window.location.hash = '#login'
+        }}
+        onLoginClick={() => {
+          window.location.hash = '#login'
+        }}
+      />
+    )
+  }
+
+  // Đã đăng nhập nhưng muốn xem lại trang giới thiệu:
+  if (tab === 'landing') {
+    return (
+      <LandingView
+        isLoggedIn
+        onStart={() => {
+          window.location.hash = '#capture'
+        }}
+        onLoginClick={() => {
+          window.location.hash = '#dashboard'
+        }}
+      />
     )
   }
 
@@ -170,6 +218,7 @@ export default function App() {
     try {
       await logout()
       setUser(null)
+      window.location.hash = '#landing'
     } catch (e) {
       // Chưa chắc server đã xoá phiên: ở lại, báo để bấm lại.
       setSignOutError(e instanceof Error ? e.message : String(e))

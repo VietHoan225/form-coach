@@ -15,6 +15,7 @@ interface Props {
   onLoggedIn: (user: User) => void
   // Phiên hết hạn giữa chừng: vẽ đè lên app (các màn bên dưới vẫn giữ nguyên), kèm lời giải thích.
   overlay?: boolean
+  onBackToLanding?: () => void
 }
 
 export default function LoginView({ allowRegister, googleClientId, onLoggedIn, overlay = false }: Props) {
@@ -89,7 +90,7 @@ export default function LoginView({ allowRegister, googleClientId, onLoggedIn, o
       {...(overlay && { role: 'dialog', 'aria-modal': true, 'aria-labelledby': 'login-expired' })}
     >
       <header className="login-top">
-        <span className="login-brand">
+        <a href="#landing" className="login-brand" style={{ textDecoration: 'none', color: 'inherit' }}>
           <span className="login-logo small" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="5,19 12,6 19,19" />
@@ -97,8 +98,15 @@ export default function LoginView({ allowRegister, googleClientId, onLoggedIn, o
             </svg>
           </span>
           Form Coach
-        </span>
-        <ThemeToggle />
+        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {!overlay && (
+            <a href="#landing" className="text-button" style={{ fontSize: 'var(--text-body-sm)' }}>
+              ‹ Giới thiệu
+            </a>
+          )}
+          <ThemeToggle />
+        </div>
       </header>
 
       <div className="login-body">
